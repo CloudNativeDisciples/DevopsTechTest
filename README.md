@@ -20,6 +20,7 @@ Remember this exercise is about more than just the code you deliver.
 ## The task
 
 The developers have two simple Golang services:
+
 1. Dashboard, for creating questions (or 'Buffs')
 2. Server, a service for serving them to users.
 
@@ -36,6 +37,7 @@ There is a docker-compose file that is used by the developers to test the applic
 ### How to test locally
 
 Start the dependency services with the command
+
 ```
 $ docker-compose up -d mysql activemq redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5 redis-cluster-init
 ```
@@ -47,6 +49,7 @@ $ docker-compose up --build server dashboard
 ```
 
 Add a new question ('buff') into the system
+
 ```
 $ curl -X POST -H "Content-Type: application/json" -d '{"question": "who", "answers": ["me","you"]}' localhost:8080/buff -D -
 HTTP/1.1 200 OK
@@ -55,6 +58,7 @@ Content-Length: 0
 ```
 
 Verify that the 'buff' was stored in the system and can be served to the user
+
 ```
 $ curl localhost:8081/buffs -D -
 HTTP/1.1 200 OK
@@ -83,13 +87,62 @@ We need a 'battle-ready' production deployment of these services.
 Please submit a git repo containing:
 
 1. Any progress made implementing your solution
-    * terraform scrips e.t.c.
+   - terraform scrips e.t.c.
 2. An extensive `README.md` that explains:
-    * What you have done
-    * What is still needed
-    * How you would implement the missing bits
-    * Time estimate in days how long you think each bit would take
+   - What you have done
+   - What is still needed
+   - How you would implement the missing bits
+   - Time estimate in days how long you think each bit would take
 
 **Provide an honest and reasonable time estimation**
 Don't be tempted to under-estimate to impress us.
 If you got this far, we are already impressed :)
+
+### Terraform
+
+There is some Terraform configuration in the infra directory to help you get started. A proposed structure is provided (feel free to use or change as needed)
+
+```
+├── environments
+│   └── dev
+│       ├── main.tf
+│       ├── provider.tf
+│       ├── terraform.tfvars
+│       └── variables.tf
+├── modules
+│   ├── aws-dynamodb
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── aws-kms-key
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── aws-s3-bucket
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── aws-s3-bucket-policy
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   ├── aws-terraform-remote-state
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   └── aws-vpc
+│       ├── main.tf
+│       └── variables.tf
+└── s3_backend_bootstrap
+    ├── main.tf
+    ├── outputs.tf
+    ├── provider.tf
+    ├── terraform.tfstate
+    ├── terraform.tfstate.backup
+    ├── terraform.tfvars
+    └── variables.tf
+```
+
+To help you get started there is an "s3_backend_bootstrap" directory that contains the necessary configuration to set up an AWS S3 backend. Apply this configuration against your own AWS account to get started. You will need to modify terraform.tfvars with your AWS profile details etc...
+
+There is an environments directory that can be used to deploy to a "dev" environment. Extend this to include the extra modules that are needed to complete the task.
